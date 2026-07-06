@@ -2,11 +2,15 @@ package com.example.healthtracker.ui.screen
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,6 +42,21 @@ fun HistoryScreen(weightDao: WeightDao, calorieDao: CalorieDao) {
     val calorieSummary by calorieDao.getDailySummary(sevenDaysAgo).collectAsState(initial = emptyList())
 
     val dateFormat = remember { SimpleDateFormat("M/d", Locale.getDefault()) }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            scope.launch {
+                try {
+                    val result = CsvExporter.importCsv(context, it, weightDao, calorieDao)
+                    Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    Toast.makeText(context, "导入失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -108,6 +127,17 @@ fun HistoryScreen(weightDao: WeightDao, calorieDao: CalorieDao) {
             Icon(Icons.Default.Share, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text("导出 CSV")
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = { importLauncher.launch("text/*") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Default.FileUpload, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("导入 CSV")
         }
     }
 }

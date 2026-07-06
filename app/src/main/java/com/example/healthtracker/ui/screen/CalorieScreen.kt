@@ -95,7 +95,7 @@ fun CalorieScreen(calorieDao: CalorieDao) {
             OutlinedTextField(
                 value = foodInput,
                 onValueChange = { foodInput = it },
-                label = { Text("食物") },
+                label = { Text("食物（可选）") },
                 modifier = Modifier.weight(1f),
                 singleLine = true
             )
@@ -114,13 +114,13 @@ fun CalorieScreen(calorieDao: CalorieDao) {
 
         Button(
             onClick = {
-                val cal = calorieInput.toIntOrNull() ?: return@Button
+                val kcal = calorieInput.toIntOrNull() ?: return@Button
                 scope.launch {
                     calorieDao.insert(
                         CalorieRecord(
                             date = System.currentTimeMillis(),
-                            foodName = foodInput.trim(),
-                            calories = cal,
+                            foodName = foodInput.trim().ifBlank { "未填写" },
+                            calories = kcal,
                             mealType = MEAL_TYPES[selectedMeal]
                         )
                     )
@@ -129,7 +129,7 @@ fun CalorieScreen(calorieDao: CalorieDao) {
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = foodInput.isNotBlank() && calorieInput.toIntOrNull() != null
+            enabled = calorieInput.toIntOrNull() != null
         ) {
             Text("保存记录")
         }

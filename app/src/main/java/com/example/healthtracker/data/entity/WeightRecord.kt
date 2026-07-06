@@ -8,5 +8,6 @@ data class WeightRecord(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val date: Long,
     val weight: Float,
+    val waist: Float? = null,
     val note: String? = null
 )
