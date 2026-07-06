@@ -1,0 +1,3 @@
+-keepattributes *Annotation*
+-keep class com.example.healthtracker.data.entity.** { *; }
+-keep class com.example.healthtracker.data.dao.** { *; }
