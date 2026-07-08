@@ -341,9 +341,8 @@ private fun WeightChartCanvas(
         drawPath(mainPath, lineColor, style = Stroke(width = 2.5f, cap = StrokeCap.Round))
 
         // -- dots and value labels --
-        val visibleIndices = data.indices.filter { isVisible(screenX(normX(it))) }
-        val maxLabels = (dataAreaWidth / 44f).toInt().coerceAtLeast(1)
-        val labelStep = max(1, visibleIndices.size / maxLabels)
+        var lastLabelX = -200f
+        val minLabelGap = 48f
 
         data.forEachIndexed { i, (_, v) ->
             val sx = screenX(normX(i))
@@ -357,8 +356,7 @@ private fun WeightChartCanvas(
                 center = Offset(sx, sy)
             )
 
-            val posInVisible = visibleIndices.indexOf(i)
-            if (isSel || (posInVisible >= 0 && posInVisible % labelStep == 0)) {
+            if (isSel || sx - lastLabelX >= minLabelGap) {
                 drawText(
                     textMeasurer,
                     "%.1f".format(v),
@@ -368,6 +366,7 @@ private fun WeightChartCanvas(
                         color = if (isSel) selectedColor else labelColor
                     )
                 )
+                if (!isSel) lastLabelX = sx
             }
         }
 
@@ -375,23 +374,21 @@ private fun WeightChartCanvas(
         val totalDays = if (data.size >= 2)
             (data.last().first - data.first().first) / 86_400_000f else 1f
         val dateFormat = when {
-            totalDays / scale <= 30 -> SimpleDateFormat("M/d", Locale.getDefault())
-            totalDays / scale <= 180 -> SimpleDateFormat("M/d", Locale.getDefault())
+            totalDays / scale <= 90 -> SimpleDateFormat("M/d", Locale.getDefault())
             else -> SimpleDateFormat("yy/M", Locale.getDefault())
         }
-        val dateLabelCount = (dataAreaWidth / 65f).toInt().coerceIn(2, data.size)
-        val dateLabelStep = max(1, data.size / dateLabelCount)
+        var lastDateX = -200f
+        val minDateGap = 72f
         data.forEachIndexed { i, (ts, _) ->
-            if (i % dateLabelStep == 0 || i == data.size - 1) {
-                val sx = screenX(normX(i))
-                if (isVisible(sx)) {
-                    drawText(
-                        textMeasurer,
-                        dateFormat.format(Date(ts)),
-                        topLeft = Offset(sx - 14f, size.height - paddingBottom + 8f),
-                        style = TextStyle(fontSize = 9.sp, color = labelColor)
-                    )
-                }
+            val sx = screenX(normX(i))
+            if (isVisible(sx) && sx - lastDateX >= minDateGap) {
+                drawText(
+                    textMeasurer,
+                    dateFormat.format(Date(ts)),
+                    topLeft = Offset(sx - 14f, size.height - paddingBottom + 8f),
+                    style = TextStyle(fontSize = 9.sp, color = labelColor)
+                )
+                lastDateX = sx
             }
         }
 
