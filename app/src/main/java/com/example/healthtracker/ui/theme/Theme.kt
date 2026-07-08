@@ -5,12 +5,12 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val LightColorScheme = lightColorScheme(
-    primary = Green40,
-    onPrimary = androidx.compose.ui.graphics.Color.White,
-    primaryContainer = GreenContainer,
-    secondary = Blue40,
-    surface = Surface,
-    onSurface = OnSurface,
+    primary = MinionYellowDark,
+    onPrimary = MinionOnSurface,
+    primaryContainer = MinionYellowContainer,
+    secondary = MinionBlue,
+    surface = MinionSurface,
+    onSurface = MinionOnSurface,
     error = Red400
 )
 

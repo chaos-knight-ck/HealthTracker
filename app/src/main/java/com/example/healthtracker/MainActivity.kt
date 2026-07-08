@@ -14,12 +14,14 @@ class MainActivity : ComponentActivity() {
 
         val app = application as HealthTrackerApp
         val db = app.database
+        val settings = app.settingsManager
 
         setContent {
             HealthTrackerTheme {
                 AppNavGraph(
                     weightDao = db.weightDao(),
-                    calorieDao = db.calorieDao()
+                    calorieDao = db.calorieDao(),
+                    settingsManager = settings
                 )
             }
         }

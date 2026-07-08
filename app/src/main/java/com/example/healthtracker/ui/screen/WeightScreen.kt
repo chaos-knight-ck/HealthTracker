@@ -21,14 +21,17 @@ import androidx.compose.ui.unit.dp
 import com.example.healthtracker.data.dao.WeightDao
 import com.example.healthtracker.data.entity.WeightRecord
 import com.example.healthtracker.ui.theme.Green40
+import com.example.healthtracker.ui.theme.MinionBlue
+import com.example.healthtracker.ui.theme.Orange400
 import com.example.healthtracker.ui.theme.Red400
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WeightScreen(weightDao: WeightDao) {
+fun WeightScreen(weightDao: WeightDao, heightCm: Float? = null, goalWeight: Float? = null) {
     val scope = rememberCoroutineScope()
     val recentRecords by weightDao.getRecent(20).collectAsState(initial = emptyList())
     val latestWeight by weightDao.getLatest().collectAsState(initial = null)
@@ -77,7 +80,7 @@ fun WeightScreen(weightDao: WeightDao) {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("当前体重", style = MaterialTheme.typography.titleMedium)
+                    Text("当前体重 banana~", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = latestWeight?.let { "%.1f kg".format(it.weight) } ?: "-- kg",
@@ -86,13 +89,53 @@ fun WeightScreen(weightDao: WeightDao) {
                     )
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("当前腰围", style = MaterialTheme.typography.titleMedium)
+                    Text("当前腰围 bello~", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = latestWeight?.waist?.let { "%.1f cm".format(it) } ?: "-- cm",
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.secondary
                     )
+                }
+            }
+
+            if (latestWeight != null && (heightCm != null || goalWeight != null)) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    if (heightCm != null) {
+                        val hm = heightCm / 100f
+                        val bmi = latestWeight!!.weight / (hm * hm)
+                        val (cat, catColor) = when {
+                            bmi < 18.5f -> "偏瘦" to MinionBlue
+                            bmi < 24f -> "正常" to Green40
+                            bmi < 28f -> "偏胖" to Orange400
+                            else -> "肥胖" to Red400
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("BMI", style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("%.1f %s".format(bmi, cat),
+                                style = MaterialTheme.typography.bodyLarge, color = catColor)
+                        }
+                    }
+                    if (goalWeight != null) {
+                        val diff = latestWeight!!.weight - goalWeight
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("距目标", style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("%+.1f kg".format(diff),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (abs(diff) < 0.5f) Green40 else MinionBlue)
+                        }
+                    }
                 }
             }
         }
@@ -179,12 +222,12 @@ fun WeightScreen(weightDao: WeightDao) {
             modifier = Modifier.fillMaxWidth(),
             enabled = weightInput.toFloatOrNull() != null
         ) {
-            Text("保存记录")
+            Text("保存记录 ba-ba-banana!")
         }
 
         Spacer(Modifier.height(16.dp))
 
-        Text("最近记录", style = MaterialTheme.typography.titleMedium)
+        Text("最近记录 bee-do~", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
 
         LazyColumn(
